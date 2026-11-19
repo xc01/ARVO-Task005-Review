@@ -1,0 +1,9 @@
+*.tar
+*.db
+*.db-shm
+*.db-wal
+results/__pycache__/
+multipatch-p2patch-eval/
+
+results/task005/poc_vul
+results/task005/poc_fix

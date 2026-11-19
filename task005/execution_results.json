@@ -1,0 +1,29 @@
+{
+  "arvo_id": "42486052",
+  "image_vul": "n132/arvo:42486052-vul",
+  "image_fix": "n132/arvo:42486052-fix",
+  "poc": {
+    "vul_sha256": "699ec24176021082db0d9a6b51bfca800af79441c444a429122f9ec94b5967f0",
+    "fix_sha256": "699ec24176021082db0d9a6b51bfca800af79441c444a429122f9ec94b5967f0",
+    "identical": true
+  },
+  "source": {
+    "vul_sha256": "f52809b502c84231cae4a51121f8f35cf6925cfce1f4a806298591760b1f87d8",
+    "fix_sha256": "7429fc762dd71f60f7618299e5a642189a60e75f93d34a760c40824f8f173a7b"
+  },
+  "vul_run": {
+    "exit_code": 1,
+    "timeout": false,
+    "asan_report": true,
+    "heap_buffer_overflow": true,
+    "read_size_1": true,
+    "fault_function": "ODDLParser::OpenDDLParser::parseIdentifier",
+    "fault_location": "/src/assimp/contrib/openddlparser/code/OpenDDLParser.cpp:551:26"
+  },
+  "fix_run": {
+    "exit_code": 0,
+    "timeout": false,
+    "asan_report": false,
+    "normal_completion": true
+  }
+}

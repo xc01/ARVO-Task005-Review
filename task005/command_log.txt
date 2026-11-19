@@ -1,0 +1,92 @@
+## 2026-11-19T12:25:33+08:00
+$ pwd
+/home/bigdata/PatchDiff
+$ df -h /home/bigdata /tmp
+Filesystem      Size  Used Avail Use% Mounted on
+/dev/sda3      1007G  403G  558G  42% /
+/dev/sda3      1007G  403G  558G  42% /tmp
+$ uname -a
+Linux ibd-211 6.8.0-124-generic #124~22.04.1-Ubuntu SMP PREEMPT_DYNAMIC Tue May 26 21:05:19 UTC  x86_64 x86_64 x86_64 GNU/Linux
+$ free -h
+               total        used        free      shared  buff/cache   available
+Mem:            31Gi        10Gi       475Mi        13Mi        20Gi        20Gi
+Swap:          2.0Gi       2.0Gi       0.0Ki
+$ docker version
+Client:
+ Version:           29.1.3
+ API version:       1.52
+ Go version:        go1.24.4
+ Git commit:        29.1.3-0ubuntu3~22.04.2
+ Built:             Wed Apr 29 22:18:59 2026
+ OS/Arch:           linux/amd64
+ Context:           default
+permission denied while trying to connect to the docker API at unix:///var/run/docker.sock
+$ docker images --filter reference=n132/arvo:42486052-vul --filter reference=n132/arvo:42486052-fix --digests
+permission denied while trying to connect to the docker API at unix:///var/run/docker.sock
+$ docker manifest inspect n132/arvo:42486052-vul
+failed to configure transport: error pinging v2 registry: Get "https://registry-1.docker.io/v2/": proxyconnect tcp: dial tcp 127.0.0.1:7890: socket: operation not permitted
+$ docker manifest inspect n132/arvo:42486052-fix
+failed to configure transport: error pinging v2 registry: Get "https://registry-1.docker.io/v2/": proxyconnect tcp: dial tcp 127.0.0.1:7890: socket: operation not permitted
+## 2026-11-19T12:57:19+08:00
+### manifest n132/arvo:42486052-vul
+exit=0
+jq: error: syntax error, unexpected ';', expecting FIELD or as or '.' or '[' (Unix shell quoting issues?) at <top-level>, line 1:
+if .manifests then .manifests[] | [.platform.os,.platform.architecture,(.platform.variant // ""),(.size // 0)] | @tsv else "linux","amd64","",(reduce .layers[].size; . + 0) end                                                                                                                                                                    
+jq: 1 compile error
+compressed_layers_bytes=1865010767
+### manifest n132/arvo:42486052-fix
+exit=0
+jq: error: syntax error, unexpected ';', expecting FIELD or as or '.' or '[' (Unix shell quoting issues?) at <top-level>, line 1:
+if .manifests then .manifests[] | [.platform.os,.platform.architecture,(.platform.variant // ""),(.size // 0)] | @tsv else "linux","amd64","",(reduce .layers[].size; . + 0) end                                                                                                                                                                    
+jq: 1 compile error
+compressed_layers_bytes=1107125362
+### pull vul
+Error response from daemon: Get "https://registry-1.docker.io/v2/": proxyconnect tcp: dial tcp 172.17.0.1:17891: connect: connection refused
+pull_vul_exit=1 elapsed=0s
+### pull fix
+Error response from daemon: Get "https://registry-1.docker.io/v2/": proxyconnect tcp: dial tcp 172.17.0.1:17891: connect: connection refused
+pull_fix_exit=1 elapsed=0s
+### inspect
+
+Error response from daemon: No such image: n132/arvo:42486052-vul
+Error response from daemon: No such image: n132/arvo:42486052-fix
+## proxy status 2026-11-19T12:58:46+08:00
+$ ss -ltnp | grep -E "7890|17891"
+LISTEN 0      4096            127.0.0.1:7890       0.0.0.0:*    users:(("mihomo",pid=157569,fd=9))          
+$ docker info | grep -A8 -i proxy
+ HTTP Proxy: http://172.17.0.1:17891
+ HTTPS Proxy: http://172.17.0.1:17891
+ No Proxy: localhost,127.0.0.1,172.17.0.1
+ Experimental: false
+ Insecure Registries:
+  ::1/128
+  127.0.0.0/8
+ Live Restore Enabled: false
+ Firewall Backend: iptables
+
+$ curl daemon proxy
+curl: (7) Failed to connect to 172.17.0.1 port 17891 after 0 ms: Connection refused
+000
+$ curl local proxy
+401
+## load 2026-11-19T13:50:11+08:00
+invalid archive: failed to decode manifest.json: json: cannot unmarshal object into Go value of type []tarexport.manifestItem
+## extract 2026-11-19T13:56:11+08:00
+container_vul=640bb64adb6893137f95313acf9339704a172d038185cf1d464f9a26ae17f294
+inspect_config_vul
+{"Hostname":"640bb64adb68","Domainname":"","User":"","AttachStdin":false,"AttachStdout":true,"AttachStderr":true,"Tty":false,"OpenStdin":false,"StdinOnce":false,"Env":["PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/out:/root/.go/bin:/root/go/bin:/rust/bin","DEBIAN_FRONTEND=noninteractive","OUT=/out","SRC=/src","WORK=/work","CC=clang","CXX=clang++","CCC=clang++","CFLAGS=-O1 -fno-omit-frame-pointer -gline-tables-only -DFUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION","CXXFLAGS_EXTRA=-stdlib=libc++","CXXFLAGS=-O1 -fno-omit-frame-pointer -gline-tables-only -DFUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION -stdlib=libc++","CMAKE_VERSION=3.17.3","PYTHON_VERSION=3.8.3","GOPATH=/root/go","CARGO_HOME=/rust","RUSTUP_HOME=/rust/rustup","SANITIZER_FLAGS_address=-fsanitize=address -fsanitize-address-use-after-scope","SANITIZER_FLAGS_undefined=-fsanitize=array-bounds,bool,builtin,enum,float-divide-by-zero,function,integer-divide-by-zero,null,object-size,return,returns-nonnull-attribute,shift,signed-integer-overflow,unsigned-integer-overflow,unreachable,vla-bound,vptr -fno-sanitize-recover=array-bounds,bool,builtin,enum,float-divide-by-zero,function,integer-divide-by-zero,null,object-size,return,returns-nonnull-attribute,shift,signed-integer-overflow,unreachable,vla-bound,vptr","SANITIZER_FLAGS_memory=-fsanitize=memory -fsanitize-memory-track-origins","SANITIZER_FLAGS_dataflow=-fsanitize=dataflow","SANITIZER_FLAGS_coverage=","UBSAN_OPTIONS=silence_unsigned_overflow=1","DFSAN_OPTIONS=warn_unimplemented=0","COVERAGE_FLAGS=-fsanitize=fuzzer-no-link","COVERAGE_FLAGS_coverage=-fprofile-instr-generate -fcoverage-mapping -pthread -Wl,--no-as-needed -Wl,-ldl -Wl,-lm -Wno-unused-command-line-argument","COVERAGE_FLAGS_dataflow=-fsanitize-coverage=trace-pc-guard,pc-table,bb,trace-cmp","SANITIZER=address","FUZZING_ENGINE=libfuzzer","ARCHITECTURE=x86_64","LIB_FUZZING_ENGINE_DEPRECATED=/usr/lib/libFuzzingEngine.a","LIB_FUZZING_ENGINE=/usr/lib/libFuzzingEngine.a","FUZZER_LDFLAGS=","PRECOMPILED_DIR=/usr/lib/precompiled"],"Cmd":["sleep","infinity"],"Image":"n132/arvo:42486052-vul","Volumes":null,"WorkingDir":"/src/assimp","Entrypoint":null,"Labels":{}}
+poc_vul=extracted
+source_vul=extracted
+container_fix=386c764c22bed745b3dfe9530d7244f774b466fa21d3e6362f63be710ef8198a
+inspect_config_fix
+{"Hostname":"386c764c22be","Domainname":"","User":"","AttachStdin":false,"AttachStdout":true,"AttachStderr":true,"Tty":false,"OpenStdin":false,"StdinOnce":false,"Env":["PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/out","DEBIAN_FRONTEND=noninteractive","OUT=/out","SRC=/src","WORK=/work","CMAKE_VERSION=3.21.1","CC=clang","CXX=clang++","CCC=clang++","CFLAGS=-O1 -fno-omit-frame-pointer -gline-tables-only -DFUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION","CXXFLAGS_EXTRA=-stdlib=libc++","CXXFLAGS=-O1 -fno-omit-frame-pointer -gline-tables-only -DFUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION -stdlib=libc++","PYTHON_VERSION=3.8.3","BAZELISK_VERSION=1.9.0","SANITIZER_FLAGS_address=-fsanitize=address -fsanitize-address-use-after-scope","SANITIZER_FLAGS_undefined=-fsanitize=array-bounds,bool,builtin,enum,float-divide-by-zero,function,integer-divide-by-zero,null,object-size,return,returns-nonnull-attribute,shift,signed-integer-overflow,unsigned-integer-overflow,unreachable,vla-bound,vptr -fno-sanitize-recover=array-bounds,bool,builtin,enum,float-divide-by-zero,function,integer-divide-by-zero,null,object-size,return,returns-nonnull-attribute,shift,signed-integer-overflow,unreachable,vla-bound,vptr","SANITIZER_FLAGS_memory=-fsanitize=memory -fsanitize-memory-track-origins","SANITIZER_FLAGS_dataflow=-fsanitize=dataflow","SANITIZER_FLAGS_thread=-fsanitize=thread","SANITIZER_FLAGS_coverage=","UBSAN_OPTIONS=silence_unsigned_overflow=1","DFSAN_OPTIONS=warn_unimplemented=0","COVERAGE_FLAGS=-fsanitize=fuzzer-no-link","COVERAGE_FLAGS_coverage=-fprofile-instr-generate -fcoverage-mapping -pthread -Wl,--no-as-needed -Wl,-ldl -Wl,-lm -Wno-unused-command-line-argument","COVERAGE_FLAGS_dataflow=-fsanitize-coverage=trace-pc-guard,pc-table,bb,trace-cmp","SANITIZER=address","FUZZING_ENGINE=libfuzzer","ARCHITECTURE=x86_64","LIB_FUZZING_ENGINE_DEPRECATED=/usr/lib/libFuzzingEngine.a","LIB_FUZZING_ENGINE=/usr/lib/libFuzzingEngine.a","FUZZER_LDFLAGS="],"Cmd":["sleep","infinity"],"Image":"n132/arvo:42486052-fix","Volumes":null,"WorkingDir":"/src/assimp","Entrypoint":null,"Labels":{}}
+poc_fix=extracted
+source_fix=extracted
+699ec24176021082db0d9a6b51bfca800af79441c444a429122f9ec94b5967f0  results/task005/poc_vul
+699ec24176021082db0d9a6b51bfca800af79441c444a429122f9ec94b5967f0  results/task005/poc_fix
+f52809b502c84231cae4a51121f8f35cf6925cfce1f4a806298591760b1f87d8  results/task005/source/42486052-vul/OpenDDLParser.cpp
+7429fc762dd71f60f7618299e5a642189a60e75f93d34a760c40824f8f173a7b  results/task005/source/42486052-fix/OpenDDLParser.cpp
+## run vul 2026-11-19T13:57:12+08:00
+vul_exit=1 elapsed=1s
+## run fix 2026-11-19T13:57:13+08:00
+fix_exit=0 elapsed=1s
