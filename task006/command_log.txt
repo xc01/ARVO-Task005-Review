@@ -1,0 +1,619 @@
+## 2026-11-19T14:41:40+08:00
+$ sha256sum task005 source copies and task004 before/after
+f52809b502c84231cae4a51121f8f35cf6925cfce1f4a806298591760b1f87d8  results/task005/source/42486052-vul/OpenDDLParser.cpp
+7429fc762dd71f60f7618299e5a642189a60e75f93d34a760c40824f8f173a7b  results/task005/source/42486052-fix/OpenDDLParser.cpp
+b983346ebd95e387706d234b3db0573be994911969c618c20b721dd4287a9746  results/task004/source/42486052/before/contrib/openddlparser/code/OpenDDLParser.cpp
+7429fc762dd71f60f7618299e5a642189a60e75f93d34a760c40824f8f173a7b  results/task004/source/42486052/after/contrib/openddlparser/code/OpenDDLParser.cpp
+$ compare vul image source vs task004 before
+  143  61  62
+  144  65  60
+ 1311 120 105
+ 1312 141 170
+ 1313 162 160
+ 1314 163 157
+ 1315 145 162
+ 1316 162 164
+ 1352 105 120
+ 1353 170 141
+ 1354 160 162
+ 1355 157 163
+ 1356 162 145
+ 1357 164 162
+ 1373 143 155
+ 1375 163 164
+ 1376 163 150
+ 1377 145  56
+ 1378 162 150
+ 1379 164  76
+cmp: EOF on results/task004/source/42486052/before/contrib/openddlparser/code/OpenDDLParser.cpp after byte 29159
+cmp: write failed
+$ diff
+$ nl vul parseIdentifier around 500-560
+   500	    }
+   501	    buffer = newBuffer;
+   502	}
+   503	
+   504	char *OpenDDLParser::parseName( char *in, char *end, Name **name ) {
+   505	    *name = ddl_nullptr;
+   506	    if( ddl_nullptr == in || in == end ) {
+   507	        return in;
+   508	    }
+   509	
+   510	    // ignore blanks
+   511	    in = lookForNextToken( in, end );
+   512	    if( *in != '$' && *in != '%' ) {
+   513	        return in;
+   514	    }
+   515	
+   516	    NameType ntype( GlobalName );
+   517	    if( *in == '%' ) {
+   518	        ntype = LocalName;
+   519	    }
+   520	    in++;
+   521	    Name *currentName( ddl_nullptr );
+   522	    Text *id( ddl_nullptr );
+   523	    in = parseIdentifier( in, end, &id );
+   524	    if( id ) {
+   525	        currentName = new Name( ntype, id );
+   526	        if( currentName ) {
+   527	            *name = currentName;
+   528	        }
+   529	    }
+   530	
+   531	    return in;
+   532	}
+   533	
+   534	char *OpenDDLParser::parseIdentifier( char *in, char *end, Text **id ) {
+   535	    *id = ddl_nullptr;
+   536	    if( ddl_nullptr == in || in == end ) {
+   537	        return in;
+   538	    }
+   539	
+   540	    // ignore blanks
+   541	    in = lookForNextToken( in, end );
+   542	
+   543	    // staring with a number is forbidden
+   544	    if( isNumeric<const char>( *in ) ) {
+   545	        return in;
+   546	    }
+   547	
+   548	    // get size of id
+   549	    size_t idLen( 0 );
+   550	    char *start( in );
+   551	    while( !isSeparator( *in ) && 
+   552	            !isNewLine( *in ) && ( in != end ) && 
+   553	            *in != Grammar::OpenPropertyToken[ 0 ] &&
+   554	            *in != Grammar::ClosePropertyToken[ 0 ] && 
+   555	            *in != '$' ) {
+   556	        ++in;
+   557	        ++idLen;
+   558	    }
+   559	
+   560	    const size_t len( idLen );
+   561	    *id = new Text( start, len );
+   562	
+   563	    return in;
+   564	}
+   565	
+$ nl task004 before 500-560
+   500	
+   501	char *OpenDDLParser::parseName(char *in, char *end, Name **name) {
+   502	    *name = nullptr;
+   503	    if (nullptr == in || in == end) {
+   504	        return in;
+   505	    }
+   506	
+   507	    // ignore blanks
+   508	    in = lookForNextToken(in, end);
+   509	    if (*in != '$' && *in != '%') {
+   510	        return in;
+   511	    }
+   512	
+   513	    NameType ntype(GlobalName);
+   514	    if (*in == '%') {
+   515	        ntype = LocalName;
+   516	    }
+   517	    in++;
+   518	    Name *currentName(nullptr);
+   519	    Text *id(nullptr);
+   520	    in = parseIdentifier(in, end, &id);
+   521	    if (id) {
+   522	        currentName = new Name(ntype, id);
+   523	        if (currentName) {
+   524	            *name = currentName;
+   525	        }
+   526	    }
+   527	
+   528	    return in;
+   529	}
+   530	
+   531	char *OpenDDLParser::parseIdentifier(char *in, char *end, Text **id) {
+   532	    *id = nullptr;
+   533	    if (nullptr == in || in == end) {
+   534	        return in;
+   535	    }
+   536	
+   537	    // ignore blanks
+   538	    in = lookForNextToken(in, end);
+   539	    if (in == end) {
+   540	        return in;
+   541	    }
+   542	
+   543	    // staring with a number is forbidden
+   544	    if (isNumeric<const char>(*in)) {
+   545	        return in;
+   546	    }
+   547	
+   548	    // get size of id
+   549	    size_t idLen(0);
+   550	    char *start(in);
+   551	    while (!isSeparator(*in) &&
+   552	            !isNewLine(*in) && (in != end) &&
+   553	            *in != Grammar::OpenPropertyToken[0] &&
+   554	            *in != Grammar::ClosePropertyToken[0] &&
+   555	            *in != '$') {
+   556	        ++in;
+   557	        ++idLen;
+   558	    }
+   559	
+   560	    const size_t len(idLen);
+   561	    *id = new Text(start, len);
+   562	
+   563	    return in;
+   564	}
+   565	
+$ nl fix image 500-570
+   500	            }
+   501	        }
+   502	    }
+   503	    buffer = newBuffer;
+   504	}
+   505	
+   506	char *OpenDDLParser::parseName(char *in, char *end, Name **name) {
+   507	    *name = nullptr;
+   508	    if (nullptr == in || in == end) {
+   509	        return in;
+   510	    }
+   511	
+   512	    // ignore blanks
+   513	    in = lookForNextToken(in, end);
+   514	    if (*in != '$' && *in != '%') {
+   515	        return in;
+   516	    }
+   517	
+   518	    NameType ntype(GlobalName);
+   519	    if (*in == '%') {
+   520	        ntype = LocalName;
+   521	    }
+   522	    in++;
+   523	    Name *currentName(nullptr);
+   524	    Text *id(nullptr);
+   525	    in = parseIdentifier(in, end, &id);
+   526	    if (id) {
+   527	        currentName = new Name(ntype, id);
+   528	        if (currentName) {
+   529	            *name = currentName;
+   530	        }
+   531	    }
+   532	
+   533	    return in;
+   534	}
+   535	
+   536	char *OpenDDLParser::parseIdentifier(char *in, char *end, Text **id) {
+   537	    *id = nullptr;
+   538	    if (nullptr == in || in == end) {
+   539	        return in;
+   540	    }
+   541	
+   542	    // ignore blanks
+   543	    in = lookForNextToken(in, end);
+   544	    if (in == end) {
+   545	        return in;
+   546	    }
+   547	
+   548	    // staring with a number is forbidden
+   549	    if (isNumeric<const char>(*in)) {
+   550	        return in;
+   551	    }
+   552	
+   553	    // get size of id
+   554	    size_t idLen(0);
+   555	    char *start(in);
+   556	    while ((in != end) && !isSeparator(*in) && !isNewLine(*in) &&
+   557	            *in != Grammar::OpenPropertyToken[0] &&
+   558	            *in != Grammar::ClosePropertyToken[0] &&
+   559	            *in != '$') {
+   560	        ++in;
+   561	        ++idLen;
+   562	    }
+   563	
+   564	    const size_t len(idLen);
+   565	    *id = new Text(start, len);
+   566	
+   567	    return in;
+   568	}
+   569	
+   570	char *OpenDDLParser::parsePrimitiveDataType(char *in, char *end, Value::ValueType &type, size_t &len) {
+$ function line numbers vul
+262:char *OpenDDLParser::parseHeader( char *in, char *end ) {
+268:    in = OpenDDLParser::parseIdentifier( in, end, &id );
+286:		in = OpenDDLParser::parseName(in, end, &name_);
+301:				in = OpenDDLParser::parseProperty(in, end, &prop_);
+471:void OpenDDLParser::normalizeBuffer( std::vector<char> &buffer) {
+504:char *OpenDDLParser::parseName( char *in, char *end, Name **name ) {
+534:char *OpenDDLParser::parseIdentifier( char *in, char *end, Text **id ) {
+853:char *OpenDDLParser::parseProperty( char *in, char *end, Property **prop ) {
+$ function line numbers task004 before
+262:char *OpenDDLParser::parseHeader(char *in, char *end) {
+268:    in = OpenDDLParser::parseIdentifier(in, end, &id);
+286:        in = OpenDDLParser::parseName(in, end, &name);
+299:                in = OpenDDLParser::parseProperty(in, end, &prop);
+469:void OpenDDLParser::normalizeBuffer(std::vector<char> &buffer) {
+501:char *OpenDDLParser::parseName(char *in, char *end, Name **name) {
+531:char *OpenDDLParser::parseIdentifier(char *in, char *end, Text **id) {
+853:char *OpenDDLParser::parseProperty(char *in, char *end, Property **prop) {
+$ function line numbers fix
+262:char *OpenDDLParser::parseHeader(char *in, char *end) {
+268:    in = OpenDDLParser::parseIdentifier(in, end, &id);
+286:        in = OpenDDLParser::parseName(in, end, &name);
+299:                in = OpenDDLParser::parseProperty(in, end, &prop);
+474:void OpenDDLParser::normalizeBuffer(std::vector<char> &buffer) {
+506:char *OpenDDLParser::parseName(char *in, char *end, Name **name) {
+536:char *OpenDDLParser::parseIdentifier(char *in, char *end, Text **id) {
+857:char *OpenDDLParser::parseProperty(char *in, char *end, Property **prop) {
+$ docker create vul
+16d34fe572319b84e0cc50e2976f11f5e49e0f8ffc1eb69b4334c5de6ca03f06
+$ docker cp /out/assimp_fuzzer
+$ docker cp /src/assimp listing
+$ inspect arvo entrypoint
+null ["sleep","infinity"]
+$ binary info
+results/task006/binaries/assimp_fuzzer_vul: ELF 64-bit LSB executable, x86-64, version 1 (SYSV), dynamically linked, interpreter /lib64/ld-linux-x86-64.so.2, for GNU/Linux 2.6.32, with debug_info, not stripped
+397e121ddb42978a516f9afa35422cea30e018b390eb4af2cb6c3aab44040bb7  results/task006/binaries/assimp_fuzzer_vul
+$ readelf available?
+/usr/bin/readelf
+GNU readelf (GNU Binutils for Ubuntu) 2.38
+$ DWARF compilation units
+ <0><b>: Abbrev Number: 1 (DW_TAG_compile_unit)
+    <c>   DW_AT_producer    : (indirect string, offset: 0x0): clang version 11.0.0 (https://github.com/llvm/llvm-project.git 04b9a46c842f793a2baedcad64de35fcbd3e93b7)
+    <10>   DW_AT_language    : 33	(C++14)
+    <12>   DW_AT_name        : (indirect string, offset: 0x69): /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerCrossOver.cpp
+--
+ <0><196>: Abbrev Number: 1 (DW_TAG_compile_unit)
+    <197>   DW_AT_producer    : (indirect string, offset: 0x0): clang version 11.0.0 (https://github.com/llvm/llvm-project.git 04b9a46c842f793a2baedcad64de35fcbd3e93b7)
+    <19b>   DW_AT_language    : 33	(C++14)
+    <19d>   DW_AT_name        : (indirect string, offset: 0x11f): /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDataFlowTrace.cpp
+--
+ <0><c09a>: Abbrev Number: 1 (DW_TAG_compile_unit)
+    <c09b>   DW_AT_producer    : (indirect string, offset: 0x0): clang version 11.0.0 (https://github.com/llvm/llvm-project.git 04b9a46c842f793a2baedcad64de35fcbd3e93b7)
+    <c09f>   DW_AT_language    : 33	(C++14)
+    <c0a1>   DW_AT_name        : (indirect string, offset: 0x302d): /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp
+--
+ <0><21702>: Abbrev Number: 1 (DW_TAG_compile_unit)
+    <21703>   DW_AT_producer    : (indirect string, offset: 0x0): clang version 11.0.0 (https://github.com/llvm/llvm-project.git 04b9a46c842f793a2baedcad64de35fcbd3e93b7)
+    <21707>   DW_AT_language    : 33	(C++14)
+    <21709>   DW_AT_name        : (indirect string, offset: 0x685b): /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerExtFunctionsWeak.cpp
+--
+ <0><217ae>: Abbrev Number: 1 (DW_TAG_compile_unit)
+    <217af>   DW_AT_producer    : (indirect string, offset: 0x0): clang version 11.0.0 (https://github.com/llvm/llvm-project.git 04b9a46c842f793a2baedcad64de35fcbd3e93b7)
+    <217b3>   DW_AT_language    : 33	(C++14)
+    <217b5>   DW_AT_name        : (indirect string, offset: 0x68bc): /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerExtraCounters.cpp
+--
+ <0><217d8>: Abbrev Number: 1 (DW_TAG_compile_unit)
+    <217d9>   DW_AT_producer    : (indirect string, offset: 0x0): clang version 11.0.0 (https://github.com/llvm/llvm-project.git 04b9a46c842f793a2baedcad64de35fcbd3e93b7)
+    <217dd>   DW_AT_language    : 33	(C++14)
+    <217df>   DW_AT_name        : (indirect string, offset: 0x68fd): /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerFork.cpp
+--
+ <0><35437>: Abbrev Number: 1 (DW_TAG_compile_unit)
+    <35438>   DW_AT_producer    : (indirect string, offset: 0x0): clang version 11.0.0 (https://github.com/llvm/llvm-project.git 04b9a46c842f793a2baedcad64de35fcbd3e93b7)
+    <3543c>   DW_AT_language    : 33	(C++14)
+    <3543e>   DW_AT_name        : (indirect string, offset: 0x7f68): /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerIO.cpp
+--
+ <0><3890a>: Abbrev Number: 1 (DW_TAG_compile_unit)
+    <3890b>   DW_AT_producer    : (indirect string, offset: 0x0): clang version 11.0.0 (https://github.com/llvm/llvm-project.git 04b9a46c842f793a2baedcad64de35fcbd3e93b7)
+    <3890f>   DW_AT_language    : 33	(C++14)
+    <38911>   DW_AT_name        : (indirect string, offset: 0x842a): /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerIOPosix.cpp
+--
+ <0><3a366>: Abbrev Number: 1 (DW_TAG_compile_unit)
+    <3a367>   DW_AT_producer    : (indirect string, offset: 0x0): clang version 11.0.0 (https://github.com/llvm/llvm-project.git 04b9a46c842f793a2baedcad64de35fcbd3e93b7)
+    <3a36b>   DW_AT_language    : 33	(C++14)
+    <3a36d>   DW_AT_name        : (indirect string, offset: 0x84ca): /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp
+--
+ <0><4a1ae>: Abbrev Number: 1 (DW_TAG_compile_unit)
+    <4a1af>   DW_AT_producer    : (indirect string, offset: 0x0): clang version 11.0.0 (https://github.com/llvm/llvm-project.git 04b9a46c842f793a2baedcad64de35fcbd3e93b7)
+    <4a1b3>   DW_AT_language    : 33	(C++14)
+    <4a1b5>   DW_AT_name        : (indirect string, offset: 0xb2b5): /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMerge.cpp
+--
+ <0><5c6e9>: Abbrev Number: 1 (DW_TAG_compile_unit)
+    <5c6ea>   DW_AT_producer    : (indirect string, offset: 0x0): clang version 11.0.0 (https://github.com/llvm/llvm-project.git 04b9a46c842f793a2baedcad64de35fcbd3e93b7)
+    <5c6ee>   DW_AT_language    : 33	(C++14)
+    <5c6f0>   DW_AT_name        : (indirect string, offset: 0xcb1a): /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMutate.cpp
+--
+ <0><621db>: Abbrev Number: 1 (DW_TAG_compile_unit)
+    <621dc>   DW_AT_producer    : (indirect string, offset: 0x0): clang version 11.0.0 (https://github.com/llvm/llvm-project.git 04b9a46c842f793a2baedcad64de35fcbd3e93b7)
+    <621e0>   DW_AT_language    : 33	(C++14)
+    <621e2>   DW_AT_name        : (indirect string, offset: 0xdae4): /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerSHA1.cpp
+--
+$ debug source paths
+    <c>   DW_AT_producer    : (indirect string, offset: 0x0): clang version 11.0.0 (https://github.com/llvm/llvm-project.git 04b9a46c842f793a2baedcad64de35fcbd3e93b7)
+    <12>   DW_AT_name        : (indirect string, offset: 0x69): /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerCrossOver.cpp
+    <1a>   DW_AT_comp_dir    : (indirect string, offset: 0xa6): /work/llvm-stage2
+    <2b>   DW_AT_name        : (indirect string, offset: 0xb8): operator()
+    <30>   DW_AT_name        : (indirect string, offset: 0x108ff): next
+    <35>   DW_AT_name        : (indirect string, offset: 0xb8): operator()
+    <3a>   DW_AT_name        : (indirect string, offset: 0xb8): operator()
+    <3f>   DW_AT_name        : (indirect string, offset: 0x5018): Rand
+    <44>   DW_AT_name        : (indirect string, offset: 0xb8): operator()
+    <49>   DW_AT_name        : (indirect string, offset: 0xc3): min<unsigned long, std::__Fuzzer::__less<unsigned long, unsigned long> >
+    <4e>   DW_AT_name        : (indirect string, offset: 0x10c): min<unsigned long>
+    <5f>   DW_AT_name        : (indirect string, offset: 0xd8dc): CrossOver
+    <184>   DW_AT_name        : (indirect string, offset: 0xfbd8): memcpy
+    <197>   DW_AT_producer    : (indirect string, offset: 0x0): clang version 11.0.0 (https://github.com/llvm/llvm-project.git 04b9a46c842f793a2baedcad64de35fcbd3e93b7)
+    <19d>   DW_AT_name        : (indirect string, offset: 0x11f): /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDataFlowTrace.cpp
+    <1a5>   DW_AT_comp_dir    : (indirect string, offset: 0xa6): /work/llvm-stage2
+    <1b6>   DW_AT_name        : (indirect string, offset: 0x185): basic_stringstream
+    <1bb>   DW_AT_name        : (indirect string, offset: 0x160): basic_istream
+    <1c0>   DW_AT_name        : (indirect string, offset: 0x16e): basic_iostream
+    <1c5>   DW_AT_name        : (indirect string, offset: 0xdb21): init
+    <1ca>   DW_AT_name        : (indirect string, offset: 0x199): basic_stringbuf
+    <1cf>   DW_AT_name        : (indirect string, offset: 0x17d): __zero
+    <1d4>   DW_AT_name        : (indirect string, offset: 0x1b4): basic_string
+    <1d9>   DW_AT_name        : (indirect string, offset: 0x184): ~basic_stringstream
+    <1de>   DW_AT_name        : (indirect string, offset: 0x184): ~basic_stringstream
+    <1e3>   DW_AT_name        : (indirect string, offset: 0x198): ~basic_stringbuf
+    <1e8>   DW_AT_name        : (indirect string, offset: 0x1a9): __is_long
+    <1ed>   DW_AT_name        : (indirect string, offset: 0x1b3): ~basic_string
+    <1f2>   DW_AT_name        : (indirect string, offset: 0x1c1): __get_long_pointer
+    <1f7>   DW_AT_name        : (indirect string, offset: 0x1d4): __do_call
+    <1fc>   DW_AT_name        : (indirect string, offset: 0x1de): __do_deallocate_handle_size
+    <201>   DW_AT_name        : (indirect string, offset: 0x1fa): __do_deallocate_handle_size_align
+    <206>   DW_AT_name        : (indirect string, offset: 0x21c): __libcpp_deallocate
+    <20b>   DW_AT_name        : (indirect string, offset: 0x225): deallocate
+    <210>   DW_AT_name        : (indirect string, offset: 0x225): deallocate
+    <221>   DW_AT_name        : (indirect string, offset: 0x2a46): AppendCoverage
+    <3e3>   DW_AT_name        : (indirect string, offset: 0x25b): str
+    <5d2>   DW_AT_name        : (indirect string, offset: 0x2a46): AppendCoverage
+    <1251>   DW_AT_name        : (indirect string, offset: 0x1b4): basic_string
+    <1256>   DW_AT_name        : (indirect string, offset: 0x2af3): fail
+    <125b>   DW_AT_name        : (indirect string, offset: 0x2af3): fail
+    <1260>   DW_AT_name        : (indirect string, offset: 0x230): operator bool
+    <1265>   DW_AT_name        : (indirect string, offset: 0x23e): insert
+    <126a>   DW_AT_name        : (indirect string, offset: 0xf340): size
+    <126f>   DW_AT_name        : (indirect string, offset: 0x245): empty
+    <1274>   DW_AT_name        : (indirect string, offset: 0x24b): __get_pointer
+    <1279>   DW_AT_name        : (indirect string, offset: 0x19257): data
+    <127e>   DW_AT_name        : (indirect string, offset: 0x259): c_str
+    <1283>   DW_AT_name        : (indirect string, offset: 0x1c1): __get_long_pointer
+    <1288>   DW_AT_name        : (indirect string, offset: 0x25f): length
+    <128d>   DW_AT_name        : (indirect string, offset: 0x266): basic_string<nullptr_t>
+    <1292>   DW_AT_name        : (indirect string, offset: 0x27e): __init
+    <1297>   DW_AT_name        : (indirect string, offset: 0x285): __set_short_size
+    <129c>   DW_AT_name        : (indirect string, offset: 0x296): copy
+    <12a1>   DW_AT_name        : (indirect string, offset: 0x29b): __recommend
+    <12a6>   DW_AT_name        : (indirect string, offset: 0x2a7): __libcpp_allocate
+    <12ab>   DW_AT_name        : (indirect string, offset: 0x2b0): allocate
+    <12b0>   DW_AT_name        : (indirect string, offset: 0x2b0): allocate
+    <12b5>   DW_AT_name        : (indirect string, offset: 0x2b9): __set_long_pointer
+    <12ba>   DW_AT_name        : (indirect string, offset: 0x2cc): __set_long_cap
+    <12bf>   DW_AT_name        : (indirect string, offset: 0x2db): __set_long_size
+    <12c4>   DW_AT_name        : (indirect string, offset: 0xe82): assign
+    <12c9>   DW_AT_name        : (indirect string, offset: 0x24b): __get_pointer
+    <12ce>   DW_AT_name        : (indirect string, offset: 0x2eb): operator[]
+    <12d3>   DW_AT_name        : (indirect string, offset: 0x562): __vector_base
+    <12d8>   DW_AT_name        : (indirect string, offset: 0x571): vector
+    <12dd>   DW_AT_name        : (indirect string, offset: 0x2f6): __compressed_pair_elem<nullptr_t, void>
+    <12e2>   DW_AT_name        : (indirect string, offset: 0x31e): __compressed_pair<nullptr_t, std::__Fuzzer::__default_init_tag>
+    <12e7>   DW_AT_name        : (indirect string, offset: 0x35e): operator!
+    <12ec>   DW_AT_name        : (indirect string, offset: 0x368): __insert_unique
+    <12f1>   DW_AT_name        : (indirect string, offset: 0x378): push_back
+    <12f6>   DW_AT_name        : (indirect string, offset: 0x384): construct<unsigned int, const unsigned int &>
+    <12fb>   DW_AT_name        : (indirect string, offset: 0x382): __construct<unsigned int, const unsigned int &>
+    <1300>   DW_AT_name        : (indirect string, offset: 0x384): construct<unsigned int, const unsigned int &>
+    <1305>   DW_AT_name        : (indirect string, offset: 0x3b2): __construct_one_at_end<const unsigned int &>
+    <130a>   DW_AT_name        : (indirect string, offset: 0x3df): ~_ConstructTransaction
+    <130f>   DW_AT_name        : (indirect string, offset: 0xf340): size
+    <1314>   DW_AT_name        : (indirect string, offset: 0x3f6): __push_back_slow_path<const unsigned int &>
+    <1319>   DW_AT_name        : (indirect string, offset: 0x29b): __recommend
+    <131e>   DW_AT_name        : (indirect string, offset: 0x4ba): __split_buffer
+    <1323>   DW_AT_name        : (indirect string, offset: 0x2b0): allocate
+    <1328>   DW_AT_name        : (indirect string, offset: 0x2b0): allocate
+    <132d>   DW_AT_name        : (indirect string, offset: 0x422): __swap_out_circular_buffer
+    <1332>   DW_AT_name        : (indirect string, offset: 0x43d): __construct_backward_with_exception_guarantees<unsigned int *>
+    <1337>   DW_AT_name        : (indirect string, offset: 0x47e): construct<unsigned int, unsigned int>
+    <133c>   DW_AT_name        : (indirect string, offset: 0x47c): __construct<unsigned int, unsigned int>
+    <1341>   DW_AT_name        : (indirect string, offset: 0x47e): construct<unsigned int, unsigned int>
+    <1346>   DW_AT_name        : (indirect string, offset: 0x4a4): swap<unsigned int *>
+    <134b>   DW_AT_name        : (indirect string, offset: 0x4b9): ~__split_buffer
+    <1350>   DW_AT_name        : (indirect string, offset: 0x225): deallocate
+    <1355>   DW_AT_name        : (indirect string, offset: 0x225): deallocate
+    <135a>   DW_AT_name        : (indirect string, offset: 0x245): empty
+    <135f>   DW_AT_name        : (indirect string, offset: 0xf2d5): back
+    <1364>   DW_AT_name        : (indirect string, offset: 0x4c9): __destruct_at_end
+    <1369>   DW_AT_name        : (indirect string, offset: 0x4c9): __destruct_at_end
+    <136e>   DW_AT_name        : (indirect string, offset: 0x4db): pop_back
+    <1373>   DW_AT_name        : (indirect string, offset: 0x4e4): operator==<unsigned int *, unsigned int *>
+    <1378>   DW_AT_name        : (indirect string, offset: 0x50f): operator!=<unsigned int *>
+    <137d>   DW_AT_name        : (indirect string, offset: 0xb8): operator()
+    <1382>   DW_AT_name        : (indirect string, offset: 0x52a): find<unsigned long>
+$ build system and compiler in image
+exists=/src/assimp/CMakeLists.txt
+exists=/src/assimp/fuzz/assimp_fuzzer.cc
+exists=/usr/local/bin/clang
+exists=/usr/local/bin/clang++
+exists=/usr/bin/ar
+missing=/work/build
+exists=/out
+$ arvo entrypoint script
+missing_arvo_script
+$ host cmake/ninja
+/usr/bin/cmake
+cmake version 3.22.1
+$ check compile command exists
+/tmp/task006_compile: Bourne-Again shell script, ASCII text executable
+#!/bin/bash -eu
+# Copyright 2016 Google Inc.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+################################################################################
+
+echo "---------------------------------------------------------------"
+
+if [ "$SANITIZER" = "dataflow" ] && [ "$FUZZING_ENGINE" != "dataflow" ]; then
+  echo "ERROR: 'dataflow' sanitizer can be used with 'dataflow' engine only."
+  exit 1
+fi
+
+if [ -z "${SANITIZER_FLAGS-}" ]; then
+  FLAGS_VAR="SANITIZER_FLAGS_${SANITIZER}"
+  export SANITIZER_FLAGS=${!FLAGS_VAR-}
+fi
+
+if [[ $ARCHITECTURE == "i386" ]]; then
+    export CFLAGS="-m32 $CFLAGS"
+    cp -R /usr/i386/lib/* /usr/lib
+fi
+if [[ $FUZZING_ENGINE != "none" ]]; then
+  # compile script might override environment, use . to call it.
+  . compile_${FUZZING_ENGINE}
+fi
+
+if [[ $SANITIZER_FLAGS = *sanitize=memory* ]]
+then
+  # Take all libraries from lib/msan and MSAN_LIBS_PATH
+  # export CXXFLAGS_EXTRA="-L/usr/msan/lib $CXXFLAGS_EXTRA"
+  cp -R /usr/msan/lib/* /usr/lib/
+
+  if [[ -z "${MSAN_LIBS_PATH-}" ]]; then
+    echo 'WARNING: Building without MSan instrumented libraries.'
+  else
+    # Copy all static libraries only. Don't include .so files because they can
+    # break non MSan compiled programs.
+    (cd "$MSAN_LIBS_PATH" && find . -name '*.a' -exec cp --parents '{}' / ';')
+$ check build cache dirs
+missing=/work
+missing=/out/.o
+missing=/src/assimp/CMakeCache.txt
+missing=/src/assimp/build
+$ image manifest digests from command_log
+compressed_layers_bytes=1865010767
+compressed_layers_bytes=1107125362
+$ image inspect id
+sha256:09112d6823af9ed42134a8ea8fd5d23576c7151a71a40f406e702aea4835b690 [n132/arvo:42486052-vul] amd64
+sha256:3c3013128c3c3da766578d894b28dc30f37023b40093eb080937292a6b019c2f [n132/arvo:42486052-fix] amd64
+$ run commands from task005
+## run vul 2026-11-19T13:57:12+08:00
+vul_exit=1 elapsed=1s
+## run fix 2026-11-19T13:57:13+08:00
+fix_exit=0 elapsed=1s
+$ blob digest verification evidence
+        raise RuntimeError(f"digest mismatch {dest}: {got}")
+
+## 2026-11-19T15:34:47+08:00 corrective trace for P1
+$ TextFileToBuffer impl
+   455	    data.reserve(fileSize + 1);
+   456	    data.resize(fileSize);
+   457	    if (fileSize > 0) {
+   458	        if (fileSize != stream->Read(&data[0], 1, fileSize)) {
+   459	            throw DeadlyImportError("File read error");
+   460	        }
+   461	
+   462	        ConvertToUTF8(data);
+   463	    }
+   464	
+   465	    // append a binary zero to simplify string parsing
+   466	    data.push_back(0);
+   467	}
+$ ASan stack frames (from task005 vul_stderr)
+    #0 0x1230f00 in ODDLParser::OpenDDLParser::parseIdentifier(char*, char*, ODDLParser::Text**) /src/assimp/contrib/openddlparser/code/OpenDDLParser.cpp:551:26
+    #1 0x12314ce in ODDLParser::OpenDDLParser::parseName(char*, char*, ODDLParser::Name**) /src/assimp/contrib/openddlparser/code/OpenDDLParser.cpp:523:10
+    #2 0x1230177 in ODDLParser::OpenDDLParser::parseHeader(char*, char*) /src/assimp/contrib/openddlparser/code/OpenDDLParser.cpp:286:8
+    #3 0x122fd5f in ODDLParser::OpenDDLParser::parseNextNode(char*, char*) /src/assimp/contrib/openddlparser/code/OpenDDLParser.cpp:246:10
+    #4 0x122f67e in ODDLParser::OpenDDLParser::parse() /src/assimp/contrib/openddlparser/code/OpenDDLParser.cpp:227:19
+    #5 0xa04ff4 in Assimp::OpenGEX::OpenGEXImporter::InternReadFile(std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > const&, aiScene*, Assimp::IOSystem*) /src/assimp/code/AssetLib/OpenGEX/OpenGEXImporter.cpp:314:28
+$ ASan region line
+28:0x602000000239 is located 0 bytes to the right of 9-byte region [0x602000000230,0x602000000239)
+$ vul parseIdentifier entry (no in==end guard after lookForNextToken)
+   534	char *OpenDDLParser::parseIdentifier( char *in, char *end, Text **id ) {
+   535	    *id = ddl_nullptr;
+   536	    if( ddl_nullptr == in || in == end ) {
+   537	        return in;
+   538	    }
+   539	
+   540	    // ignore blanks
+   541	    in = lookForNextToken( in, end );
+   542	
+   543	    // staring with a number is forbidden
+   544	    if( isNumeric<const char>( *in ) ) {
+   545	        return in;
+   546	    }
+   547	
+   548	    // get size of id
+   549	    size_t idLen( 0 );
+   550	    char *start( in );
+   551	    while( !isSeparator( *in ) && 
+   552	            !isNewLine( *in ) && ( in != end ) && 
+   553	            *in != Grammar::OpenPropertyToken[ 0 ] &&
+   554	            *in != Grammar::ClosePropertyToken[ 0 ] && 
+   555	            *in != '$' ) {
+   556	        ++in;
+   557	        ++idLen;
+   558	    }
+$ fix parseIdentifier entry (guard added)
+   536	char *OpenDDLParser::parseIdentifier(char *in, char *end, Text **id) {
+   537	    *id = nullptr;
+   538	    if (nullptr == in || in == end) {
+   539	        return in;
+   540	    }
+   541	
+   542	    // ignore blanks
+   543	    in = lookForNextToken(in, end);
+   544	    if (in == end) {
+   545	        return in;
+   546	    }
+   547	
+   548	    // staring with a number is forbidden
+   549	    if (isNumeric<const char>(*in)) {
+   550	        return in;
+   551	    }
+   552	
+   553	    // get size of id
+   554	    size_t idLen(0);
+   555	    char *start(in);
+   556	    while ((in != end) && !isSeparator(*in) && !isNewLine(*in) &&
+   557	            *in != Grammar::OpenPropertyToken[0] &&
+   558	            *in != Grammar::ClosePropertyToken[0] &&
+   559	            *in != '$') {
+   560	        ++in;
+   561	        ++idLen;
+   562	    }
+
+## 2026-11-19T15:35:58+08:00 baseline applicability check
+$ git apply --check official diff against vul source
+error: patch failed: contrib/openddlparser/code/OpenDDLParser.cpp:292
+error: contrib/openddlparser/code/OpenDDLParser.cpp: patch does not apply
+error: patch failed: contrib/openddlparser/include/openddlparser/OpenDDLParserUtils.h:318
+error: contrib/openddlparser/include/openddlparser/OpenDDLParserUtils.h: patch does not apply
+exit=0
+$ ancestry: 575ce613 -> 10737165
+ancestor=YES
+$ ancestry: 6a3ac62 -> fix image HEAD 3664fe20
+ancestor=YES
+$ chartype_table presence by revision
+575ce613 chartype_table_refs=0
+57e691e28 chartype_table_refs=2
+16c3f8222 chartype_table_refs=2
+$ hashes: Utils.h three versions
+f07deb999174bdcb30674459559cbe0292a4460f95c3a125212ecea08218b29f  results/task006/assimp_src_vul/contrib/openddlparser/include/openddlparser/OpenDDLParserUtils.h
+24ebf153606bdb175a35306d47cc5d1f0b4e3a984c6c082287246932bf7a82a2  results/task004/source/42486052/before/contrib/openddlparser/include/openddlparser/OpenDDLParserUtils.h
+45d613ab0edf53586d01a3cfc1b49023455164c7457afa8a74e47e511b71b24e  results/task006/src_fix/assimp/contrib/openddlparser/include/openddlparser/OpenDDLParserUtils.h

@@ -5,5 +5,8 @@
 results/__pycache__/
 multipatch-p2patch-eval/
 
-results/task005/poc_vul
-results/task005/poc_fix
+task005/poc_vul
+task005/poc_fix
+task006/assimp_src_vul/
+task006/src_fix/
+task006/binaries/
