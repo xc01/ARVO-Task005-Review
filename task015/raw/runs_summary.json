@@ -1,0 +1,75 @@
+[
+  {
+    "run": 1,
+    "tag": "wb1",
+    "C2_final": "future-commit",
+    "C2_patch_type": "incomplete",
+    "C2_round_trace": [
+      "r1:P1:YES/n/a:judge=AGREE(6/7):unresolved",
+      "r2:P2:YES/incomplete:judge=DISAGREE(?):unresolved",
+      "r3:P2:YES/incomplete:judge=DISAGREE(?):unresolved"
+    ],
+    "other_candidates_future": []
+  },
+  {
+    "run": 2,
+    "tag": "wb2",
+    "C2_final": "future-commit",
+    "C2_patch_type": "incomplete",
+    "C2_round_trace": [
+      "r1:P1:YES/n/a:judge=AGREE(6/6):unresolved",
+      "r2:P2:YES/incomplete:judge=DISAGREE(?):unresolved",
+      "r3:P2:NO/n/a:judge=DISAGREE(5/8):unresolved"
+    ],
+    "other_candidates_future": []
+  },
+  {
+    "run": 3,
+    "tag": "wb3",
+    "C2_final": "future-commit",
+    "C2_patch_type": "incomplete",
+    "C2_round_trace": [
+      "r1:P1:YES/n/a:judge=AGREE(6/6):unresolved",
+      "r2:P2:YES/incomplete:judge=AGREE(7/8):unresolved",
+      "r3:P2:YES/incomplete:judge=AGREE(7/8):unresolved"
+    ],
+    "other_candidates_future": []
+  },
+  {
+    "run": 4,
+    "tag": "wb4",
+    "C2_final": "future-commit",
+    "C2_patch_type": "incomplete",
+    "C2_round_trace": [
+      "r1:P1:YES/n/a:judge=DISAGREE(?):unresolved",
+      "r2:P2:NO/n/a:judge=DISAGREE(6/8):unresolved",
+      "r3:P2:YES/incomplete:judge=AGREE(8/8):unresolved"
+    ],
+    "other_candidates_future": []
+  },
+  {
+    "run": 5,
+    "tag": "wb5",
+    "C2_final": "future-commit",
+    "C2_patch_type": "incomplete",
+    "C2_round_trace": [
+      "r1:P1:YES/n/a:judge=AGREE(5/5):unresolved",
+      "r2:P2:UNKNOWN/unknown:judge=DISAGREE(?):unresolved",
+      "r3:P2:YES/incomplete:judge=AGREE(7/9):unresolved"
+    ],
+    "other_candidates_future": []
+  },
+  {
+    "run": 6,
+    "tag": "ship1",
+    "note": "run_case.sh all (static stage included: CodeQL+Semgrep inconclusive, no CWE-601 finding); source of ../expected/scan_summary.jsonl",
+    "C2_final": "future-commit",
+    "C2_patch_type": "incomplete",
+    "C2_round_trace": [
+      "r1:P1:YES/n/a:judge=DISAGREE(?):unresolved",
+      "r2:P2:YES/incomplete:judge=AGREE(11/12):unresolved",
+      "r3:P2:YES/incomplete:judge=AGREE(7/9):unresolved"
+    ],
+    "other_candidates_future": []
+  }
+]

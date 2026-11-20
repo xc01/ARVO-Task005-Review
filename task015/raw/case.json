@@ -1,0 +1,13 @@
+{
+  "cve": "CVE-2026-44889",
+  "cwe": "CWE-601",
+  "owner": "Pylons",
+  "repo": "webob",
+  "repo_url": "https://github.com/Pylons/webob",
+  "repo_path": "/repos/webob",
+  "language": "python",
+  "c1": "2b9fbedafb31180c910cf8526e9ea72b4603d0bc",
+  "c2": "a6c1422948131b9d679b341f72dab3c146bc8600",
+  "later_commits": "all",
+  "cve_description": "When WebOb normalizes the HTTP Location header to include the request hostname, it does so by parsing the URL that the user is to be redirected to with Python's urllib.parse, and joining it to the base URL. urlsplit (called internally by urljoin) treats a // at the start of a string as a URI without a scheme, and then treats the next part as the hostname; urljoin then uses that hostname, replacing the original one from the request. A previous advisory (GHSA-mg3v-6m49-jhp3 / CVE-2024-42353) attempted to fix this by replacing // with /%2f, but did not take into account that since Python 3.10 urlsplit internally strips ASCII tab, carriage return, and newline characters from the string, so /\\t/attacker.com is turned into //attacker.com and an attacker can bypass that fix, bringing back the open redirect. Fixed in WebOb 1.8.10."
+}

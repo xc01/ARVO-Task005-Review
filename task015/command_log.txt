@@ -1,0 +1,58 @@
+## Task 015 2026-11-20T17:45:10+08:00
+# Full command history
+
+## Proxy note
+- User explicitly approved restarting local mihomo proxy (same pattern as Task 014). Started via elevated exec; no system config modified.
+
+## HF example listing
+$ curl -s https://huggingface.co/api/datasets/zhcharyzhang/patchaudit-artifact/tree/main/examples/case_CVE-2026-44889 -> 200
+$ curl -s .../runs/agent_inputs_C2 -> 200
+Downloads: README.md, case.json, scan_summary.jsonl, runs_summary.json, runs_README.md, commits_data.jsonl, cve_description.json, slicing.jsonl (all 200)
+
+## GitHub commit API
+$ curl -s https://api.github.com/repos/Pylons/webob/commits/2b9fbedafb31180c910cf8526e9ea72b4603d0bc -> 200
+$ curl -s .../commits/a6c1422948131b9d679b341f72dab3c146bc8600 -> 200
+$ curl -s .../commits/f2184c8b... -> 200
+$ curl -s .../commits/d3077b84... -> 200
+$ curl -s .../commits/ff895606 -> 200 (full sha ff89560643fb252751b4db8806a283b5377f1f07)
+$ curl -s .../commits/54c1133c -> 200
+$ curl -s .../commits?since=... (twice) -> 200
+$ curl -s (diff Accept header) c1.diff, c2.diff, ff895606.diff -> 200
+$ curl -s contents/tests/test_exc.py?ref=... and test_response.py?ref=54c1133c -> 200
+
+## GH advisories
+$ curl -s https://api.github.com/advisories?ghsa_id=GHSA-fh3h-vg37-cc95 -> 200 (CVE-2026-44889, patched 1.8.10)
+$ curl -s .../GHSA-6hx8-3wjj-gr8g -> 200 (CVE-2026-54770, patched 1.8.11)
+$ curl -s .../affects= or cve_id= for CVE-2025-53010/2023-31143/2023-50266/2023-45897 -> 200
+
+## zero_day_pocs
+$ curl -s .../tree/main/data/zero_day_pocs -> 200 (13 CVE dirs + README.md, listed only)
+$ curl -sL README.md -> 200; readme/description docs for 11 cases downloaded (no payloads)
+
+## SHA-256 manifest (raw/)
+504a41709dcbbb9728a703f66b8b096272fb08c9e633b9d5167ccc48a76347b4  CVE-2021-44878_description.md
+e6e7ce5018268e85aa32e19a54b011c9b2558f49af74cad9525ca3f14ce611ef  CVE-2023-26145_readme.md
+dcc7babf4c6205dcc7329bb0b55973ad7217bc0bcf62a4641a9291ad3fdcdfa0  CVE-2023-27586_readme.md
+dcdc861c39423cc95eef803061e1582129dfb90021978cb71ee7e76a04297396  CVE-2023-31143_readme.md
+000d9350e8e89cdf443efa14065cffcb007693c161122986e8911dac9e427cf1  CVE-2023-33977_readme.md
+d512ef288d6f3f6e8eae09331d7e19df9f7b691abd11d425d590551f6b74ecf0  CVE-2023-45897_readme.md
+a4ff532c360ed5a397b5a1b27efbf15d2cbe16afb8bfb1e30e8eabe4364347fc  CVE-2023-48795_readme.md
+adca6d0ddaa19fbc3456ed9c3c3fdadf30f65314e50fe1bf50801b27e20b9e38  CVE-2023-50266_readme.md
+dcdb6365195eed81e0639273ba7ad2b7eb73e2444725af62af43a1b4d08dd1b8  CVE-2024-35230_discription.md
+c6e5f068fb8f0be5f241c6c78ba3541cc9350bd4cc080dec25683366ae170ac9  CVE-2025-53010_description.md
+b6905759a73dea44fc435dd6f5fd0170b8e3e46256f7401fff2135df3abe4566  CVE-2025-57804_description.md
+0d5032394a96fb3dd4b57c8447468ba052961b84f71712ef0ad21fdbc9777cbc  README.md
+b207644dd4dfc454a027659cbac6f44740e8b51be0174b5da3ed2353bd71d5b8  c1.diff
+0fca85a991af4115cd873d543ca73badeb8adb028acd6a6cbf529941db03ffc8  c2.diff
+399cc08e60e06e854a7e09573531e60c2d0c3c36e342df8f413fa36827d4e30d  case.json
+c3ed027c81a747842fa43c207a9340bc266aa607542a31e40718189e4247aaa9  commits_data.jsonl
+485c3ce716193d8c051801ea29d57ebeca216c659f7f4346e0af92fc921f8e02  cve_description.json
+42bb3ec5f21770e6fd6c57b3b89796667460a5189622861b917f0437faab9023  ff895606.diff
+224a635bc9348a1e4fdd65ff7301e7a02bc077dc3b19bb3384bb38e8d9e509fc  runs_README.md
+bb127675d122d9f060edd04375dab7212082238c0fc3cfe6ea3af8768a4d600d  runs_summary.json
+f76392a7f832dccfc3d481c12989dd112d5239f069adab3a3239a3cfebdf3e09  scan_summary.jsonl
+f3c20d7ffbd93beb259670ab5ba76a18a8b4ad84e414944376c85848367b35f8  slicing.jsonl
+65c7267fe38421382eceaa5e152ba31d4081a0f10cbf31afea3accd3b87ea613  zero_day_pocs_README.md
+
+## Review zip
+$ zip -qr task015_review.zip (31 files) ; sha256 717d6a21ce8bac1d10ed106a9d32b88290ed86717040b6a8bc8de9e91188a095

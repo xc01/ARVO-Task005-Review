@@ -1,0 +1,108 @@
+diff --git a/CHANGES.txt b/CHANGES.txt
+index 3008f986..bf225e96 100644
+--- a/CHANGES.txt
++++ b/CHANGES.txt
+@@ -14,6 +14,15 @@ Security Fix
+ 
+   (This fix was released in WebOb 1.8.8)
+ 
++- The fix for CVE-2024-42353 was incomplete: a Location value containing
++  ASCII tab, carriage return, or line feed characters between consecutive
++  slashes could still be interpreted as a protocol-relative URL by
++  ``urllib.parse.urljoin`` on Python 3.10+, allowing an open redirect.
++
++  See https://github.com/Pylons/webob/security/advisories/GHSA-fh3h-vg37-cc95
++
++  Thanks to Caleb Brown of Google for the report.
++
+ Feature
+ ~~~~~~~
+ 
+diff --git a/src/webob/response.py b/src/webob/response.py
+index 55b15436..30bba693 100644
+--- a/src/webob/response.py
++++ b/src/webob/response.py
+@@ -1356,12 +1356,17 @@ def md5_etag(self, body=None, set_content_md5=False):
+ 
+     @staticmethod
+     def _make_location_absolute(environ, value):
++        # urllib.parse.urlsplit() (called internally by urljoin) strips
++        # ASCII tab, CR, and LF from the URL on Python 3.10+. Strip them
++        # ourselves first so they cannot be used to bypass the SCHEME_RE
++        # or protocol-relative ("//") checks below. See CVE-2024-42353,
++        # https://github.com/Pylons/webob/security/advisories/GHSA-mg3v-6m49-jhp3,
++        # and the follow-up advisory GHSA-fh3h-vg37-cc95.
++        value = value.replace("\t", "").replace("\r", "").replace("\n", "")
++
+         if SCHEME_RE.search(value):
+             return value
+ 
+-        # This is to fix an open redirect issue due to the way that
+-        # urlparse.urljoin works. See CVE-2024-42353 and
+-        # https://github.com/Pylons/webob/security/advisories/GHSA-mg3v-6m49-jhp3
+         if value.startswith("//"):
+             value = f"/%2f{value[2:]}"
+         new_location = urlparse.urljoin(_request_uri(environ), value)
+diff --git a/tests/test_response.py b/tests/test_response.py
+index 5f32f026..d6d83a74 100644
+--- a/tests/test_response.py
++++ b/tests/test_response.py
+@@ -1096,6 +1096,58 @@ def test_location_no_open_redirect():
+     assert req.get_response(res).location == "http://localhost/%2fwww.example.com/test"
+ 
+ 
++@pytest.mark.parametrize(
++    "payload",
++    [
++        "/\t/www.example.com/test",
++        "\t//www.example.com/test",
++        "//\twww.example.com/test",
++        "/\t\t/www.example.com/test",
++    ],
++)
++def test_location_no_open_redirect_tab_bypass(payload):
++    # Follow-up to CVE-2024-42353. urllib.parse.urlsplit() (used internally
++    # by urljoin) strips ASCII tab on Python 3.10+, which allowed a
++    # Location value to bypass the "//" check and be parsed as
++    # protocol-relative. See GHSA-fh3h-vg37-cc95. (CR and LF are already
++    # rejected by the location header setter, so only tab is reachable
++    # via the public API.)
++    res = Response()
++    res.status = "301"
++    res.location = payload
++    req = Request.blank("/")
++    assert req.get_response(res).location == (
++        "http://localhost/%2fwww.example.com/test"
++    )
++
++
++@pytest.mark.parametrize(
++    "payload",
++    [
++        "/\t/www.example.com/test",
++        "/\n/www.example.com/test",
++        "/\r/www.example.com/test",
++        "\t//www.example.com/test",
++        "\n//www.example.com/test",
++        "\r//www.example.com/test",
++        "//\twww.example.com/test",
++        "//\nwww.example.com/test",
++        "//\rwww.example.com/test",
++        "//\tw\nww.example.com/test",
++    ],
++)
++def test__make_location_absolute_strips_url_whitespace(payload):
++    # Defense in depth for GHSA-fh3h-vg37-cc95: even when called with a
++    # Location value that bypasses the descriptor's CR/LF check (e.g. via
++    # direct manipulation of _headerlist), tab/CR/LF must not be usable to
++    # turn a relative path into a protocol-relative redirect.
++    result = Response._make_location_absolute(
++        {"wsgi.url_scheme": "http", "HTTP_HOST": "example.com:80"},
++        payload,
++    )
++    assert result == "http://example.com/%2fwww.example.com/test"
++
++
+ @pytest.mark.xfail(
+     sys.version_info < (3, 0),
+     reason="Python 2.x unicode != str, WSGI requires str. Test "
